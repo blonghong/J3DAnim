@@ -1,0 +1,9 @@
+c:\users\ronal\documents\visual studio 2015\Projects\J3DAnim\J3DAnim\bin\Debug\J3DAnim.exe.config
+c:\users\ronal\documents\visual studio 2015\Projects\J3DAnim\J3DAnim\bin\Debug\J3DAnim.exe
+c:\users\ronal\documents\visual studio 2015\Projects\J3DAnim\J3DAnim\bin\Debug\J3DAnim.pdb
+c:\users\ronal\documents\visual studio 2015\Projects\J3DAnim\J3DAnim\obj\Debug\J3DAnim.csprojResolveAssemblyReference.cache
+c:\users\ronal\documents\visual studio 2015\Projects\J3DAnim\J3DAnim\obj\Debug\J3DAnim.Form1.resources
+c:\users\ronal\documents\visual studio 2015\Projects\J3DAnim\J3DAnim\obj\Debug\J3DAnim.Properties.Resources.resources
+c:\users\ronal\documents\visual studio 2015\Projects\J3DAnim\J3DAnim\obj\Debug\J3DAnim.csproj.GenerateResource.Cache
+c:\users\ronal\documents\visual studio 2015\Projects\J3DAnim\J3DAnim\obj\Debug\J3DAnim.exe
+c:\users\ronal\documents\visual studio 2015\Projects\J3DAnim\J3DAnim\obj\Debug\J3DAnim.pdb
