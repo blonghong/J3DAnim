@@ -1,4 +1,11 @@
-﻿using System;
+﻿// ------------------------------------------
+// J3DAnim
+// Converts Maya's ASCII animation format to Nintendo's J3D animation format
+// 3/23/17, from MasterF0x
+// --
+// Now, if you want to take a look at this messy code, have at it. You won't be very happy :}
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -148,6 +155,7 @@ namespace J3DAnim
             br.ReadUInt32(); br.ReadUInt32();
             UInt32 bmdSize = br.ReadUInt32();
 
+            // Read the BMD and find the JNT1 chunck
             for (int i = 0; i < bmdSize - 0x32; i+=4)
             {
                 UInt32 chunkID = br.ReadUInt32();
@@ -220,6 +228,9 @@ namespace J3DAnim
             StreamReader sr = new StreamReader("test.anim", true);
             sr.ReadLine(); sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
             sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
+
+            // .anim parser - Grabs all the values and keyframes needed to make the animation --------------------------------------------------
+            // I did (jnt1.joints * 9) * 9 so the file reader can always reach the end of the file
 
             for (int i = 0; i < (jnt1.joints * 9) * 9; i++)
             {
@@ -316,6 +327,9 @@ namespace J3DAnim
                         curSubString = "";
                         break;
 
+                    // ------------------------------------------------------------------------------
+                    // ROTATIONS
+
                     case "rotate.rotateX":
                         sr.ReadLine(); sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
                         sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
@@ -403,6 +417,9 @@ namespace J3DAnim
                         curSubString = "";
                         break;
 
+                        // --------------------------------------------------------------------
+                        // SCALES 
+
                     case "scale.scaleX":
                         sr.ReadLine(); sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
                         sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
@@ -484,6 +501,9 @@ namespace J3DAnim
                         curSubString = "";
                         break;
 
+                        // ----------------------------------------------------------------------
+                        // Other junk :1
+
                     case "visibility":
                         sr.ReadLine(); sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
                         sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
@@ -523,13 +543,15 @@ namespace J3DAnim
                 }
             }
 
+            // -------------------------------------------------
+
             writeKeyframes(pos);
             sr.Close();
         }
 
         void writeKeyframes(int pos)
         {
-            initScaleKF();
+            initArrays();
 
             EndianBinaryWriter bw = new EndianBinaryWriter(File.Open("test.bck", FileMode.Open));
             bw.BaseStream.Seek(pos, 0);
@@ -537,6 +559,9 @@ namespace J3DAnim
             int floatIndex = 1;
             int rotIndex = 1;
             int scaleIndex = 1;
+
+            // Keyframes are.. weird
+            // This was a pain to do, but I'm just glad that it works :}
 
             for (int i = 0; i < jnt1.joints; i++)
             {
@@ -693,7 +718,10 @@ namespace J3DAnim
             writeOffs(bw);
         }
 
-        void initScaleKF()
+
+        // This function was made to keep the arrays filled and not go out of index
+        // It's also for making keyframes more accurate
+        void initArrays()
         {
             for (int i = 0; i < 99; i++)
             {
@@ -720,6 +748,8 @@ namespace J3DAnim
             }
         }
 
+
+        // Thank you for this, Gamma and LordNed
         private void insertPadding(EndianBinaryWriter writer, int padValue, bool usePaddingString)
         {
             // Pad up to a 32 byte alignment
@@ -754,6 +784,7 @@ namespace J3DAnim
             bw.Close();
         }
 
+        // Not used
         private double RadianToDegree(float angle)
         {
             return angle * (180.0 / Math.PI);
