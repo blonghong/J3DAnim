@@ -124,11 +124,13 @@ namespace J3DAnim
         public Form1()
         {
             InitializeComponent();
+            radioButton1.Checked = true;
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            StreamReader sr = new StreamReader("test.anim", true);
+            openFile.ShowDialog();
+            StreamReader sr = new StreamReader(openFile.FileName, true);
             animHead.version = sr.ReadLine();
             animHead.mayaVersion = sr.ReadLine();
             sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
@@ -150,7 +152,8 @@ namespace J3DAnim
 
             sr.Close();
 
-            EndianBinaryReader br = new EndianBinaryReader(File.Open("test.bmd", FileMode.Open));
+            openBMD.ShowDialog();
+            EndianBinaryReader br = new EndianBinaryReader(File.Open(openBMD.FileName, FileMode.Open));
             br.BaseStream.Seek(0, 0);
             br.ReadUInt32(); br.ReadUInt32();
             UInt32 bmdSize = br.ReadUInt32();
@@ -161,7 +164,7 @@ namespace J3DAnim
                 UInt32 chunkID = br.ReadUInt32();
                 if (chunkID == 0x4A4E5431)
                 {
-                    MessageBox.Show("JNT1 detected");
+                    //MessageBox.Show("JNT1 detected");
                     jnt1.sectionSize = (int)br.ReadUInt32();
                     jnt1.joints = (int)br.ReadUInt16();
                 }
@@ -172,11 +175,11 @@ namespace J3DAnim
 
         private void button1_Click(object sender, EventArgs e)
         {
-            System.IO.FileStream fs = System.IO.File.Create("test.bck");
+            System.IO.FileStream fs = System.IO.File.Create(openFile.FileName + ".bck");
             fs.Close();
-            EndianBinaryWriter bw = new EndianBinaryWriter(File.Open("test.bck", FileMode.Open));
+            EndianBinaryWriter bw = new EndianBinaryWriter(File.Open(openFile.FileName + ".bck", FileMode.Open));
 
-            FileInfo bck = new FileInfo("test.bck");
+            FileInfo bck = new FileInfo(openFile.FileName + ".bck");
 
             // --
             // J3D1bck1 section
@@ -225,30 +228,28 @@ namespace J3DAnim
             string[] curl = new string[44];
             int localCount = 0;
 
-            StreamReader sr = new StreamReader("test.anim", true);
+            StreamReader sr = new StreamReader(openFile.FileName, true);
             sr.ReadLine(); sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
             sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
 
             // .anim parser - Grabs all the values and keyframes needed to make the animation --------------------------------------------------
-            // I did (jnt1.joints * 9) * 9 so the file reader can always reach the end of the file
 
-            for (int i = 0; i < (jnt1.joints * 9) * 9; i++)
+            for (;;)
             {
                 string currentLine = sr.ReadLine();
-                if (currentLine == "EOF")
+                if (currentLine == null)
                 {
-                    i = 999;
                     sr.Close();
                     writeKeyframes(pos);
+                    return;
                 }
-                if (currentLine == "EOF") return;
                 curl = currentLine.Split(splitL);
                 switch(curl[1])
                 {   
                     // TRANSLATION ------------------------------------------------------------------------
                     case "translate.translateX":
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
+
+                       for (int j = 0; j < 7; j++) sr.ReadLine();
 
                        while (curSubString != "  }")
                         {
@@ -263,6 +264,7 @@ namespace J3DAnim
                                 anim.transTotal.Add(float.Parse(curindex[5]));
                                 anim.tangentsTransX.Add(0.0f);
                                 localCount++;
+                                //MessageBox.Show(curindex[curindex.Length - 3]);
                             }
                         }
 
@@ -274,8 +276,8 @@ namespace J3DAnim
                         break;
 
                     case "translate.translateY":
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
+
+                        for (int j = 0; j < 7; j++) sr.ReadLine();
 
                         while (curSubString != "  }")
                         {
@@ -301,8 +303,8 @@ namespace J3DAnim
                         break;
 
                     case "translate.translateZ":
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
+
+                        for (int j = 0; j < 7; j++) sr.ReadLine();
 
                         while (curSubString != "  }")
                         {
@@ -331,8 +333,8 @@ namespace J3DAnim
                     // ROTATIONS
 
                     case "rotate.rotateX":
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
+
+                        for (int j = 0; j < 7; j++) sr.ReadLine();
 
                         while (curSubString != "  }")
                         {
@@ -360,8 +362,8 @@ namespace J3DAnim
                         break;
 
                     case "rotate.rotateY":
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
+
+                        for (int j = 0; j < 7; j++) sr.ReadLine();
 
                         while (curSubString != "  }")
                         {
@@ -389,8 +391,8 @@ namespace J3DAnim
                         break;
 
                     case "rotate.rotateZ":
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
+
+                        for (int j = 0; j < 7; j++) sr.ReadLine();
 
                         while (curSubString != "  }")
                         {
@@ -421,8 +423,8 @@ namespace J3DAnim
                         // SCALES 
 
                     case "scale.scaleX":
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
+
+                        for (int j = 0; j < 7; j++) sr.ReadLine();
 
                         while (curSubString != "  }")
                         {
@@ -448,8 +450,8 @@ namespace J3DAnim
                         break;
 
                     case "scale.scaleY":
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
+
+                        for (int j = 0; j < 7; j++) sr.ReadLine();
 
                         while (curSubString != "  }")
                         {
@@ -475,8 +477,8 @@ namespace J3DAnim
                         break;
 
                     case "scale.scaleZ":
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
+
+                        for (int j = 0; j < 7; j++) sr.ReadLine();
 
                         while (curSubString != "  }")
                         {
@@ -505,15 +507,15 @@ namespace J3DAnim
                         // Other junk :1
 
                     case "visibility":
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
+
+                        for (int j = 0; j < 7; j++) sr.ReadLine();
 
                         while (curSubString != "  }")
                         {
                             curSubString = sr.ReadLine();
                             if (curSubString != "  }")
                             {
-                                int lol = 0;
+                                continue;
                             }
                         }
 
@@ -523,15 +525,15 @@ namespace J3DAnim
                         break;
 
                     case "MaxHandle":
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
-                        sr.ReadLine(); sr.ReadLine(); sr.ReadLine();
+
+                        for (int j = 0; j < 7; j++) sr.ReadLine();
 
                         while (curSubString != "  }")
                         {
                             curSubString = sr.ReadLine();
                             if (curSubString != "  }")
                             {
-                                int lol = 0;
+                                continue;
                             }
                         }
 
@@ -539,7 +541,6 @@ namespace J3DAnim
                         sr.ReadLine();
                         curSubString = "";
                         break;
-
                 }
             }
 
@@ -553,7 +554,7 @@ namespace J3DAnim
         {
             initArrays();
 
-            EndianBinaryWriter bw = new EndianBinaryWriter(File.Open("test.bck", FileMode.Open));
+            EndianBinaryWriter bw = new EndianBinaryWriter(File.Open(openFile.FileName + ".bck", FileMode.Open));
             bw.BaseStream.Seek(pos, 0);
 
             int floatIndex = 1;
@@ -716,6 +717,9 @@ namespace J3DAnim
 
             insertPadding(bw, 32, true);
             writeOffs(bw);
+
+            MessageBox.Show("Export successful.", "J3DAnim",
+            MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
         }
 
 
