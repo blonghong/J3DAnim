@@ -7,3 +7,13 @@ c:\users\ronal\documents\visual studio 2015\Projects\J3DAnim\J3DAnim\obj\Debug\J
 c:\users\ronal\documents\visual studio 2015\Projects\J3DAnim\J3DAnim\obj\Debug\J3DAnim.csproj.GenerateResource.Cache
 c:\users\ronal\documents\visual studio 2015\Projects\J3DAnim\J3DAnim\obj\Debug\J3DAnim.exe
 c:\users\ronal\documents\visual studio 2015\Projects\J3DAnim\J3DAnim\obj\Debug\J3DAnim.pdb
+C:\Users\booge\Desktop\J3DAnim-master\J3DAnim\obj\Debug\J3DAnim.csprojAssemblyReference.cache
+C:\Users\booge\Desktop\J3DAnim-master\J3DAnim\obj\Debug\J3DAnim.Form1.resources
+C:\Users\booge\Desktop\J3DAnim-master\J3DAnim\obj\Debug\J3DAnim.Properties.Resources.resources
+C:\Users\booge\Desktop\J3DAnim-master\J3DAnim\obj\Debug\J3DAnim.csproj.GenerateResource.cache
+C:\Users\booge\Desktop\J3DAnim-master\J3DAnim\obj\Debug\J3DAnim.csproj.CoreCompileInputs.cache
+C:\Users\booge\Desktop\J3DAnim-master\J3DAnim\obj\Debug\J3DAnim.exe
+C:\Users\booge\Desktop\J3DAnim-master\J3DAnim\obj\Debug\J3DAnim.pdb
+C:\Users\booge\Desktop\J3DAnim-master\J3DAnim\bin\Debug\J3DAnim.exe.config
+C:\Users\booge\Desktop\J3DAnim-master\J3DAnim\bin\Debug\J3DAnim.exe
+C:\Users\booge\Desktop\J3DAnim-master\J3DAnim\bin\Debug\J3DAnim.pdb

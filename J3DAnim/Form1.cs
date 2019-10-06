@@ -15,12 +15,16 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Diagnostics;
 
 namespace J3DAnim
 {
 
     public partial class Form1 : Form
     {
+        public bool animLoaded = false;
+        public bool bmdLoaded = false;
+
         public class ANIMHeader
         {
             public string version;
@@ -127,9 +131,38 @@ namespace J3DAnim
             radioButton1.Checked = true;
         }
 
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        void readAnim()
         {
-            openFile.ShowDialog();
+            DialogResult result = MessageBox.Show("Does this .anim need to be reformatted?", "Reformat Maya ANIM", MessageBoxButtons.YesNo);
+            if (result is DialogResult.Yes)
+            {
+                // Reformat the .anim
+                string[] lines = System.IO.File.ReadAllLines(openFile.FileName);
+                bool inKeys = false;
+                foreach (string line in System.IO.File.ReadAllLines(openFile.FileName))
+                {
+                    if (inKeys)
+                    {
+                        if (line.Contains("}"))
+                        {
+                            inKeys = false;
+                        }
+                        else
+                        {
+                            string current = lines[lines.ToList().IndexOf(line)];
+                            current = current.Substring(0, current.Length - 1).Replace("auto", "fixed") + " 0 1 0 1;";
+                            lines[lines.ToList().IndexOf(line)] = current;
+                        }
+                    }
+                    if (line.Contains("keys {"))
+                    {
+                        inKeys = true;
+                    }
+                    
+                }
+                System.IO.File.WriteAllLines(openFile.FileName, lines);
+            }
+
             StreamReader sr = new StreamReader(openFile.FileName, true);
             animHead.version = sr.ReadLine();
             animHead.mayaVersion = sr.ReadLine();
@@ -152,14 +185,19 @@ namespace J3DAnim
 
             sr.Close();
 
-            openBMD.ShowDialog();
+            toolStripLabel2.Text = "anim: " + openFile.FileName;
+            animLoaded = true;
+        }
+
+        void readBMD()
+        {
             EndianBinaryReader br = new EndianBinaryReader(File.Open(openBMD.FileName, FileMode.Open));
             br.BaseStream.Seek(0, 0);
             br.ReadUInt32(); br.ReadUInt32();
             UInt32 bmdSize = br.ReadUInt32();
 
             // Read the BMD and find the JNT1 chunck
-            for (int i = 0; i < bmdSize - 0x32; i+=4)
+            for (int i = 0; i < bmdSize - 0x32; i += 4)
             {
                 UInt32 chunkID = br.ReadUInt32();
                 if (chunkID == 0x4A4E5431)
@@ -171,54 +209,72 @@ namespace J3DAnim
             }
 
             br.Close();
+
+            toolStripLabel1.Text = "bmd: " + openBMD.FileName;
+            bmdLoaded = true;
+        }
+
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            openFile.ShowDialog();
+            readAnim();
+
+            openBMD.ShowDialog();
+            readBMD();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            System.IO.FileStream fs = System.IO.File.Create(openFile.FileName + ".bck");
-            fs.Close();
-            EndianBinaryWriter bw = new EndianBinaryWriter(File.Open(openFile.FileName + ".bck", FileMode.Open));
+            if (animLoaded is true && bmdLoaded is true)
+            {
+                toolStripLabel3.Text = "app: Exporting...";
+                toolStripLabel4.Visible = false;
+                System.IO.FileStream fs = System.IO.File.Create(openFile.FileName.Replace(".anim", ".bck"));
+                fs.Close();
+                EndianBinaryWriter bw = new EndianBinaryWriter(File.Open(openFile.FileName.Replace(".anim", ".bck"), FileMode.Open));
+                FileInfo bck = new FileInfo(openFile.FileName.Replace(".anim", ".bck"));
+                anim = new Form1.ANIM();
 
-            FileInfo bck = new FileInfo(openFile.FileName + ".bck");
+                // --
+                // J3D1bck1 section
+                bw.Write(0x4A33443162636B31); // J3D1bck1
+                bw.Write((Int32)bck.Length); // size
+                bw.Write(0x00000001); // sections
+                bw.Write(0xFFFFFFFFFFFFFFFF); // --v
+                bw.Write(0xFFFFFFFFFFFFFFFF); // padding
+                //--
+                // J3D1bck1 parsing ends here
 
-            // --
-            // J3D1bck1 section
-            bw.Write(0x4A33443162636B31); // J3D1bck1
-            bw.Write((Int32)bck.Length); // size
-            bw.Write(0x00000001); // sections
-            bw.Write(0xFFFFFFFFFFFFFFFF); // --v
-            bw.Write(0xFFFFFFFFFFFFFFFF); // padding
-            //--
-            // J3D1bck1 parsing ends here
+                // --
+                //ANK1 section
+                bw.Write(0x414E4B31); // ANK1
+                bw.Write((Int32)bck.Length - 0x20); // size
+                if (radioButton1.Checked) bw.BaseStream.WriteByte(0); // play once
+                if (radioButton2.Checked) bw.BaseStream.WriteByte(1); // unknown
+                if (radioButton3.Checked) bw.BaseStream.WriteByte(2); // loop
+                if (radioButton4.Checked) bw.BaseStream.WriteByte(3); // mirror
+                if (radioButton5.Checked) bw.BaseStream.WriteByte(4); // ping pong loop
+                bw.BaseStream.WriteByte(1); // angle multiplier
+                float t = float.Parse(animHead.endTime);
+                bw.Write(Convert.ToInt16(t));
+                int joints = jnt1.joints;
+                bw.Write((UInt16)joints);
 
-            // --
-            //ANK1 section
-            bw.Write(0x414E4B31); // ANK1
-            bw.Write((Int32)bck.Length - 0x20); // size
-            if (radioButton1.Checked) bw.BaseStream.WriteByte(0); // play once
-            if (radioButton2.Checked) bw.BaseStream.WriteByte(1); // unknown
-            if (radioButton3.Checked) bw.BaseStream.WriteByte(2); // loop
-            if (radioButton4.Checked) bw.BaseStream.WriteByte(3); // mirror
-            if (radioButton5.Checked) bw.BaseStream.WriteByte(4); // ping pong loop
-            bw.BaseStream.WriteByte(1); // angle multiplier
-            float t = float.Parse(animHead.endTime);
-            bw.Write(Convert.ToInt16(t));
-            int joints = jnt1.joints;
-            bw.Write((UInt16)joints);
+                bw.Write(anim.scaleCount); // scale count
+                bw.Write(anim.rotCount); // rotation count
+                bw.Write(anim.transCount); // translation count
+                bw.Write((Int32)64); // joint off
+                bw.Write(anim.scalesOff);
+                bw.Write(anim.rotsOff);
+                bw.Write(anim.transOff);
 
-            bw.Write(anim.scaleCount); // scale count
-            bw.Write(anim.rotCount); // rotation count
-            bw.Write(anim.transCount); // translation count
-            bw.Write((Int32)64); // joint off
-            bw.Write(anim.scalesOff);
-            bw.Write(anim.rotsOff);
-            bw.Write(anim.transOff);
+                insertPadding(bw, 32, true);
 
-            insertPadding(bw, 32, true);
-
-            int pos = (int)bw.BaseStream.Position;
-            bw.Close();
-            parseAnimationTable(pos);
+                int pos = (int)bw.BaseStream.Position;
+                bw.Close();
+                parseAnimationTable(pos);
+            }
         }
 
         void parseAnimationTable(int pos)
@@ -554,7 +610,7 @@ namespace J3DAnim
         {
             initArrays();
 
-            EndianBinaryWriter bw = new EndianBinaryWriter(File.Open(openFile.FileName + ".bck", FileMode.Open));
+            EndianBinaryWriter bw = new EndianBinaryWriter(File.Open(openFile.FileName.Replace(".anim", ".bck"), FileMode.Open));
             bw.BaseStream.Seek(pos, 0);
 
             int floatIndex = 1;
@@ -718,8 +774,8 @@ namespace J3DAnim
             insertPadding(bw, 32, true);
             writeOffs(bw);
 
-            MessageBox.Show("Export successful.", "J3DAnim",
-            MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            toolStripLabel3.Text = "app: Export Successful!";
+            toolStripLabel4.Visible = true;
         }
 
 
@@ -792,6 +848,108 @@ namespace J3DAnim
         private double RadianToDegree(float angle)
         {
             return angle * (180.0 / Math.PI);
+        }
+
+        private void panel1_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+                panel1.BackColor = Color.Gray;
+            }
+        }
+
+        private void panel1_DragDrop(object sender, DragEventArgs e)
+        {
+
+            string[] test = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+            if (test.Count() > 1)
+            {
+                MessageBox.Show("Please only drop one file.");
+            } else if (!test[0].Contains(".anim")) {
+                MessageBox.Show("Please only drop a '.anim' file.");
+            } else
+            {
+                openFile.FileName = test[0];
+                readAnim();
+            }
+            panel1.BackColor = SystemColors.Control;
+        }
+
+        private void panel1_DragLeave(object sender, EventArgs e)
+        {
+            panel1.BackColor = SystemColors.Control;
+        }
+
+
+
+        private void panel2_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+                panel2.BackColor = Color.Gray;
+            }
+        }
+
+        private void panel2_DragDrop(object sender, DragEventArgs e)
+        {
+
+            string[] test = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+            if (test.Count() > 1)
+            {
+                MessageBox.Show("Please only drop one file.");
+            }
+            else if (!test[0].Contains(".bmd"))
+            {
+                MessageBox.Show("Please only drop a '.bmd' file.");
+            }
+            else
+            {
+                openBMD.FileName = test[0];
+                readBMD();
+            }
+            panel2.BackColor = SystemColors.Control;
+        }
+
+        private void panel2_DragLeave(object sender, EventArgs e)
+        {
+            panel2.BackColor = SystemColors.Control;
+        }
+
+        private void toolStripLabel4_Click(object sender, EventArgs e)
+        {
+            Process proc = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "explorer.exe",
+                    Arguments = "/select, \"" + openFile.FileName.Replace(".anim", ".bck") + "\"",
+                    UseShellExecute = true,
+                    CreateNoWindow = true
+                }
+            };
+            proc.Start();
+        }
+
+        private void toolStripLabel4_MouseEnter(object sender, EventArgs e)
+        {
+            Cursor = Cursors.Hand;
+        }
+        private void toolStripLabel4_MouseLeave(object sender, EventArgs e)
+        {
+            Cursor = Cursors.Default;
+        }
+
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            //MessageBox.Show(ClientRectangle.Width.ToString());
+            panel1.Width = (ClientRectangle.Width - 27) / 2;
+            panel2.Width = (ClientRectangle.Width - 27) / 2;
+            panel1.Height = ClientRectangle.Height - 304;
+            panel2.Height = ClientRectangle.Height - 304;
         }
     }
 }
