@@ -133,35 +133,35 @@ namespace J3DAnim
 
         void readAnim()
         {
-            DialogResult result = MessageBox.Show("Does this .anim need to be reformatted?", "Reformat Maya ANIM", MessageBoxButtons.YesNo);
-            if (result is DialogResult.Yes)
-            {
-                // Reformat the .anim
-                string[] lines = System.IO.File.ReadAllLines(openFile.FileName);
-                bool inKeys = false;
-                foreach (string line in System.IO.File.ReadAllLines(openFile.FileName))
-                {
-                    if (inKeys)
-                    {
-                        if (line.Contains("}"))
-                        {
-                            inKeys = false;
-                        }
-                        else
-                        {
-                            string current = lines[lines.ToList().IndexOf(line)];
-                            current = current.Substring(0, current.Length - 1).Replace("auto", "fixed") + " 0 1 0 1;";
-                            lines[lines.ToList().IndexOf(line)] = current;
-                        }
-                    }
-                    if (line.Contains("keys {"))
-                    {
-                        inKeys = true;
-                    }
-                    
-                }
-                System.IO.File.WriteAllLines(openFile.FileName, lines);
-            }
+            //DialogResult result = MessageBox.Show("Does this .anim need to be reformatted?", "Reformat Maya ANIM", MessageBoxButtons.YesNo);
+            //if (result is DialogResult.Yes)
+            //{
+            //    // Reformat the .anim
+            //    string[] lines = System.IO.File.ReadAllLines(openFile.FileName);
+            //    bool inKeys = false;
+            //    foreach (string line in System.IO.File.ReadAllLines(openFile.FileName))
+            //    {
+            //        if (inKeys)
+            //        {
+            //            if (line.Contains("}"))
+            //            {
+            //                inKeys = false;
+            //            }
+            //            else
+            //            {
+            //                string current = lines[lines.ToList().IndexOf(line)];
+            //                current = current.Substring(0, current.Length - 1).Replace("auto", "fixed") + " 0 1 0 1;";
+            //                lines[lines.ToList().IndexOf(line)] = current;
+            //            }
+            //        }
+            //        if (line.Contains("keys {"))
+            //        {
+            //            inKeys = true;
+            //        }
+            //        
+            //    }
+            //    System.IO.File.WriteAllLines(openFile.FileName, lines);
+            //}
 
             StreamReader sr = new StreamReader(openFile.FileName, true);
             animHead.version = sr.ReadLine();
@@ -230,11 +230,15 @@ namespace J3DAnim
             {
                 toolStripLabel3.Text = "app: Exporting...";
                 toolStripLabel4.Visible = false;
+
                 System.IO.FileStream fs = System.IO.File.Create(openFile.FileName.Replace(".anim", ".bck"));
                 fs.Close();
                 EndianBinaryWriter bw = new EndianBinaryWriter(File.Open(openFile.FileName.Replace(".anim", ".bck"), FileMode.Open));
                 FileInfo bck = new FileInfo(openFile.FileName.Replace(".anim", ".bck"));
                 anim = new Form1.ANIM();
+
+                readAnim();
+                readBMD();
 
                 // --
                 // J3D1bck1 section
