@@ -274,6 +274,9 @@ namespace J3DAnim
                 int pos = (int)bw.BaseStream.Position;
                 bw.Close();
                 parseAnimationTable(pos);
+            } else
+            {
+                toolStripLabel3.Text = "app: Nothing to convert!";
             }
         }
 
@@ -950,6 +953,11 @@ namespace J3DAnim
             panel2.Width = (ClientRectangle.Width - 27) / 2;
             panel1.Height = ClientRectangle.Height - 304;
             panel2.Height = ClientRectangle.Height - 304;
+        }
+
+        private void convertToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            button1.PerformClick();
         }
     }
 }

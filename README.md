@@ -12,4 +12,4 @@ J3DAnim is a tool used to convert Maya's ASCII animation format to Nintendo's J3
 
 **4)** Go to **File -> Export Selection**, and set **Files of type** to **animExport**
 
-**5)** Open J3DAnim, select your newly exported .ANIM and original .BMD that the animation is for, pick a loop mode, and then press Export; the converted .BCK will appear alongside the .ANIM
+**5)** Open J3DAnim, select your newly exported .ANIM and original .BMD that the animation is for, pick a loop mode, and then press Convert; the converted .BCK will appear alongside the .ANIM
