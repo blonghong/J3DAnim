@@ -864,10 +864,19 @@ namespace J3DAnim
 
         private void panel1_DragEnter(object sender, DragEventArgs e)
         {
+            e.Effect = DragDropEffects.None;
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                e.Effect = DragDropEffects.Copy;
                 panel1.BackColor = Color.Gray;
+                string[] test = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                if (test.Count() == 1)
+                {
+                    if (test[0].Contains(".anim"))
+                    {
+                        e.Effect = DragDropEffects.Copy;
+                    }
+                }
             }
         }
 
@@ -898,12 +907,19 @@ namespace J3DAnim
 
         private void panel2_DragEnter(object sender, DragEventArgs e)
         {
+            e.Effect = DragDropEffects.None;
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
+                panel2.BackColor = Color.Gray;
                 string[] test = (string[])e.Data.GetData(DataFormats.FileDrop);
 
-                e.Effect = DragDropEffects.Copy;
-                panel2.BackColor = Color.Gray;
+                if (test.Count() == 1)
+                {
+                    if (test[0].Contains(".bmd"))
+                    {
+                        e.Effect = DragDropEffects.Copy;
+                    }
+                } 
             }
         }
 
