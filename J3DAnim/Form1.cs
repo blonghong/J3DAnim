@@ -176,16 +176,18 @@ namespace J3DAnim
             String[] startT = animHead.startTime.Split(splitter);
             String[] endT = animHead.endTime.Split(splitter);
 
-            textBox1.Text = animVer[1];
-            textBox2.Text = mayaVer[1] + "   " + mayaVer[2];
-            textBox3.Text = startT[1];
-            textBox4.Text = endT[1];
+            panel3.Visible = true;
+            label1.Text = "Version: " + animVer[1];
+            label2.Text = "Maya Version: " + mayaVer[1] + "   " + mayaVer[2];
+            label3.Text = "Start Keyframe: " + startT[1];
+            label4.Text = "End Keyframe: " + endT[1];
+            label8.Text = "Total Keyframes: " + ((int.Parse(endT[1]) - int.Parse(startT[1])) + 1).ToString();
 
             animHead.endTime = endT[1];
 
             sr.Close();
 
-            toolStripLabel2.Text = "anim: " + openFile.FileName;
+            toolStripLabel2.Text = "ANIM: " + openFile.FileName;
             animLoaded = true;
         }
 
@@ -210,25 +212,28 @@ namespace J3DAnim
 
             br.Close();
 
-            toolStripLabel1.Text = "bmd: " + openBMD.FileName;
+            toolStripLabel1.Text = "BMD: " + openBMD.FileName;
             bmdLoaded = true;
         }
 
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            openFile.ShowDialog();
-            readAnim();
-
-            openBMD.ShowDialog();
-            readBMD();
+            if (openFile.ShowDialog() == DialogResult.OK)
+            {
+                if (openBMD.ShowDialog() == DialogResult.OK)
+                {
+                    readAnim();
+                    readBMD();
+                }
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             if (animLoaded is true && bmdLoaded is true)
             {
-                toolStripLabel3.Text = "app: Exporting...";
+                toolStripLabel3.Text = "Application: Exporting...";
                 toolStripLabel4.Visible = false;
 
                 System.IO.FileStream fs = System.IO.File.Create(openFile.FileName.Replace(".anim", ".bck"));
@@ -280,7 +285,7 @@ namespace J3DAnim
                 parseAnimationTable(pos);
             } else
             {
-                toolStripLabel3.Text = "app: Nothing to convert!";
+                toolStripLabel3.Text = "Application: Nothing to convert!";
             }
         }
 
@@ -781,7 +786,7 @@ namespace J3DAnim
             insertPadding(bw, 32, true);
             writeOffs(bw);
 
-            toolStripLabel3.Text = "app: Export Successful!";
+            toolStripLabel3.Text = "Application: Export Successful!";
             toolStripLabel4.Visible = true;
         }
 
@@ -895,6 +900,8 @@ namespace J3DAnim
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
+                string[] test = (string[])e.Data.GetData(DataFormats.FileDrop);
+
                 e.Effect = DragDropEffects.Copy;
                 panel2.BackColor = Color.Gray;
             }
@@ -962,6 +969,22 @@ namespace J3DAnim
         private void convertToolStripMenuItem_Click(object sender, EventArgs e)
         {
             button1.PerformClick();
+        }
+
+        private void justOpenANIMToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (openFile.ShowDialog() == DialogResult.OK)
+            {
+                readAnim();
+            }
+        }
+
+        private void justOpenBMDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (openBMD.ShowDialog() == DialogResult.OK)
+            {
+                readBMD();
+            }
         }
     }
 }
