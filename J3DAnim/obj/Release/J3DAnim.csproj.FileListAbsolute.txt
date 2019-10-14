@@ -1,0 +1,10 @@
+C:\Users\booge\Desktop\J3DAnim\J3DAnim\bin\Release\J3DAnim.exe.config
+C:\Users\booge\Desktop\J3DAnim\J3DAnim\bin\Release\J3DAnim.exe
+C:\Users\booge\Desktop\J3DAnim\J3DAnim\bin\Release\J3DAnim.pdb
+C:\Users\booge\Desktop\J3DAnim\J3DAnim\obj\Release\J3DAnim.csprojAssemblyReference.cache
+C:\Users\booge\Desktop\J3DAnim\J3DAnim\obj\Release\J3DAnim.Form1.resources
+C:\Users\booge\Desktop\J3DAnim\J3DAnim\obj\Release\J3DAnim.Properties.Resources.resources
+C:\Users\booge\Desktop\J3DAnim\J3DAnim\obj\Release\J3DAnim.csproj.GenerateResource.cache
+C:\Users\booge\Desktop\J3DAnim\J3DAnim\obj\Release\J3DAnim.csproj.CoreCompileInputs.cache
+C:\Users\booge\Desktop\J3DAnim\J3DAnim\obj\Release\J3DAnim.exe
+C:\Users\booge\Desktop\J3DAnim\J3DAnim\obj\Release\J3DAnim.pdb
